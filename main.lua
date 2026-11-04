@@ -1,17 +1,16 @@
 --[[
-    Anime Dice — Hub Script
-    Compatible: Delta Executor, Wave, Solara, Zorara (Level 7+)
-    Load: loadstring(game:HttpGet("https://raw.githubusercontent.com/Davidakagunduz/anime-dice-script/master/main.lua"))()
+    Anime Dice Hub
+    Delta Executor / Wave / Solara / Zorara (Level 7+)
 ]]
 
--- Visible error popup so Delta doesn't swallow errors silently
-local function _notify(t, m)
-    pcall(function()
-        game:GetService("StarterGui"):SetCore("SendNotification", {Title = t, Text = m, Duration = 5})
-    end)
-end
+print("[AnimeDiceHub] Script demarre...")
 
-_notify("Anime Dice Hub", "Script en cours de chargement...")
+-- Wait for game to be ready
+if not game:IsLoaded() then game.Loaded:Wait() end
+repeat wait(0.5) until game:GetService("Players").LocalPlayer
+    and game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui")
+
+print("[AnimeDiceHub] Jeu charge, creation du menu...")
 
 local ok, err = pcall(function()
 
@@ -74,24 +73,26 @@ local function createGUI()
     screenGui.ResetOnSpawn = false
     screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-    -- Parent: try CoreGui first (works on most executors), then gethui, then PlayerGui
-    local guiParent = nil
+    -- Parent GUI: PlayerGui works on all executors including Delta
+    -- Try gethui/CoreGui only as upgrades (they survive respawn better)
+    local placed = false
     pcall(function()
-        if syn and syn.protect_gui then
-            syn.protect_gui(screenGui)
-        end
-        screenGui.Parent = game:GetService("CoreGui")
-        guiParent = "CoreGui"
-    end)
-    if not guiParent then
-        pcall(function()
+        if gethui then
             screenGui.Parent = gethui()
-            guiParent = "gethui"
+            placed = true
+        end
+    end)
+    if not placed then
+        pcall(function()
+            if syn and syn.protect_gui then syn.protect_gui(screenGui) end
+            screenGui.Parent = game:GetService("CoreGui")
+            placed = true
         end)
     end
-    if not guiParent then
+    if not placed then
         screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
     end
+    print("[AnimeDiceHub] GUI place dans " .. screenGui.Parent.Name)
 
     local mainFrame = Instance.new("Frame")
     mainFrame.Name = "Main"
@@ -620,6 +621,15 @@ end)
 end)
 
 if not ok then
-    _notify("ERREUR", tostring(err))
-    warn("[AnimeDiceHub] Erreur: " .. tostring(err))
+    warn("[AnimeDiceHub] ERREUR: " .. tostring(err))
+    print("[AnimeDiceHub] ERREUR: " .. tostring(err))
+    pcall(function()
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "AnimeDice ERREUR",
+            Text = tostring(err):sub(1, 100),
+            Duration = 10
+        })
+    end)
+else
+    print("[AnimeDiceHub] Menu charge avec succes!")
 end
