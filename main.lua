@@ -73,43 +73,19 @@ local function createGUI()
     screenGui.ResetOnSpawn = false
     screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-    -- Parent GUI: PlayerGui works on all executors including Delta
-    -- Try gethui/CoreGui only as upgrades (they survive respawn better)
-    local placed = false
-    pcall(function()
-        if gethui then
-            screenGui.Parent = gethui()
-            placed = true
-        end
-    end)
-    if not placed then
-        pcall(function()
-            if syn and syn.protect_gui then syn.protect_gui(screenGui) end
-            screenGui.Parent = game:GetService("CoreGui")
-            placed = true
-        end)
-    end
-    if not placed then
-        screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-    end
-    print("[AnimeDiceHub] GUI place dans " .. screenGui.Parent.Name)
+    -- Force PlayerGui — most reliable on all executors
+    screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+    print("[AnimeDiceHub] GUI place dans PlayerGui")
 
     local mainFrame = Instance.new("Frame")
     mainFrame.Name = "Main"
-    mainFrame.Size = UDim2.new(0, 300, 0, 400)
-    mainFrame.Position = UDim2.new(0.5, -150, 0.5, -200)
+    mainFrame.Size = UDim2.new(0, 280, 0, 380)
+    mainFrame.Position = UDim2.new(0, 10, 0, 10)
     mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
     mainFrame.BorderSizePixel = 0
     mainFrame.Active = true
-    mainFrame.Draggable = true
     mainFrame.Parent = screenGui
-
-    pcall(function()
-        Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 8)
-        local stroke = Instance.new("UIStroke", mainFrame)
-        stroke.Color = Color3.fromRGB(100, 60, 200)
-        stroke.Thickness = 2
-    end)
+    pcall(function() mainFrame.Draggable = true end)
 
     -- Title bar
     local titleBar = Instance.new("Frame")
