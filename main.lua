@@ -1,8 +1,17 @@
 --[[
     Anime Dice — Hub Script
     Compatible: Delta Executor, Wave, Solara, Zorara (Level 7+)
-    Load: loadstring(game:HttpGet("RAW_URL"))()
+    Load: loadstring(game:HttpGet("https://raw.githubusercontent.com/Davidakagunduz/anime-dice-script/master/main.lua"))()
 ]]
+
+-- Visible error popup so Delta doesn't swallow errors silently
+local function _notify(t, m)
+    pcall(function()
+        game:GetService("StarterGui"):SetCore("SendNotification", {Title = t, Text = m, Duration = 5})
+    end)
+end
+
+_notify("Anime Dice Hub", "Script en cours de chargement...")
 
 local ok, err = pcall(function()
 
@@ -11,9 +20,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 
-local _spawn = typeof(task) == "table" and task.spawn or spawn
-local _wait = typeof(task) == "table" and task.wait or wait
-local _delay = typeof(task) == "table" and task.delay or delay
+local _spawn = (task and task.spawn) or spawn
+local _wait = (task and task.wait) or wait
+local _delay = (task and task.delay) or delay
 
 local Modules = {}
 local ActiveLoops = {}
@@ -611,5 +620,6 @@ end)
 end)
 
 if not ok then
+    _notify("ERREUR", tostring(err))
     warn("[AnimeDiceHub] Erreur: " .. tostring(err))
 end
